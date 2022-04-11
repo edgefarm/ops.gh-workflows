@@ -66,4 +66,17 @@ jobs:
             -var prefix="${{ inputs.prefix }}" \
             -var hcloud_secret="${{ secrets.hcloud_secret }}" \
             -var hcloud_ssh_key_private="${{ secrets.hcloud_ssh_key_private }}" \
-            -var hcloud_ssh_key_public="${{ secrets.hcloud_ssh_key_public }}"
+            -var hcloud_ssh_key_public="${{ secrets.hcloud_ssh_key_public }}" \
+            -no-color
+
+          echo "::set-output name=terraform-plan::$(cat plan.out)"
+        id: run_plan
+
+      - name: Send plan to PR
+        uses: thollander/actions-comment-pull-request@v1.1.0
+        with:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          message: |
+            ```bash
+            ${{join(steps.run_plan.outputs.*, '\n')}}
+            ```
