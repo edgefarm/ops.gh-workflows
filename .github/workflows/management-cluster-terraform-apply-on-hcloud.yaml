@@ -1,4 +1,4 @@
-name: "terraform apply on hcloud"
+name: "management cluster terraform apply on hcloud"
 
 on:
   workflow_call:
