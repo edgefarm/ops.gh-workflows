@@ -15,6 +15,12 @@ on:
     secrets:
       tf_api_token:
         required: true
+      hcloud_secret:
+        required: true
+      hcloud_ssh_key_private:
+        required: true
+      hcloud_ssh_key_public:
+        required: true
 
 jobs:
   terraform:
@@ -39,17 +45,27 @@ jobs:
         with:
           cli_config_credentials_token: ${{ secrets.tf_api_token }}
 
-      # Selecting correct workspace
-      - name: Terraform Workspace Select
-        run: terraform workspace select ${{ inputs.workspace }}
-
       # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
       - name: Terraform Init
-        run: terraform init
+        run: TF_WORKSPACE=fallback terraform init -input=false
 
-      # Destroy
+      # Selecting correct workspace (and create if not exist)
+      - name: Terraform Workspace Select
+        run: terraform workspace select ${{ inputs.workspace }} || terraform workspace new ${{ inputs.workspace }}
+
+      # Destroy ressources
       - name: Terraform Destroy
-        run: terraform destroy -auto-approve
+        run: |
+          terraform destroy -auto-approve -var-file=${{ inputs.var_file }} \
+            -var prefix="${{ inputs.prefix }}" \
+            -var hcloud_secret="${{ secrets.hcloud_secret }}" \
+            -var hcloud_ssh_key_private="${{ secrets.hcloud_ssh_key_private }}" \
+            -var hcloud_ssh_key_public="${{ secrets.hcloud_ssh_key_public }}"
 
+      # Selecting fallback workspace
+      - name: Terraform Workspace Select
+        run: terraform workspace select fallback
+
+      # Delete workspace
       - name: Terraform Workspace delete
         run: terraform workspace delete -force ${{ inputs.workspace }}
