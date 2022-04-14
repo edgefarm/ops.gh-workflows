@@ -15,6 +15,13 @@ on:
       environment:
         required: true
         type: string
+      github_repository:
+        type: string
+        default: ${{ github.repository }}
+      github_ref:
+        type: string
+        default: ${{ github.sha }}
+
     secrets:
       tf_api_token:
         required: true
@@ -40,6 +47,9 @@ jobs:
       # Checkout the repository to the GitHub Actions runner
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.github_repository }}
+          ref: ${{ inputs.github_ref }}
 
       # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
       - name: Setup Terraform
