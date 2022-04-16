@@ -59,15 +59,6 @@ jobs:
       - name: Terraform Format
         run: terraform fmt -check
 
-      # Generates an execution plan for Terraform
-      - name: Terraform Plan
-        run: |
-          terraform plan -var-file=${{ inputs.var_file }} \
-            -var prefix="${{ inputs.prefix }}" \
-            -var hcloud_secret="${{ secrets.hcloud_secret }}" \
-            -var hcloud_ssh_key_private="${{ secrets.hcloud_ssh_key_private }}" \
-            -var hcloud_ssh_key_public="${{ secrets.hcloud_ssh_key_public }}"
-
         # On push to branch, build or change infrastructure according to Terraform configuration files
       - name: Terraform Apply
         run: |
